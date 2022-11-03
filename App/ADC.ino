@@ -1,0 +1,36 @@
+#include <avr/io.h>
+#include "adc.h"
+#if !defined(AVR_ATmega328P)
+
+void Adc_Init(void)
+{
+    // the AREF is equal to AVcc
+    //ADMUX = (1<<REFS0);
+ 
+    // ADC Enables and prescaler of 128
+    // 16000000/128 = 125000
+   
+    ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
+}
+unsigned short Adc_ReadChannel(unsigned char ch)
+{
+
+  // select the corresponding channel 0~7
+  // ANDing with ’7′ will always keep the value
+  // of ‘ch’ between 0 and 7
+  ch &= 0b00000111;  // AND operation with 7
+  ADMUX = (ADMUX & 0xF8)|ch; // clears the bottom 3 bits before ORing
+ 
+  // starts a single conversion
+  // writes a ’1′ in the ADSC
+  ADCSRA |= (1<<ADSC);
+ 
+  // waits for the conversion to be completed
+  // the ADSC switches to ’0′ again
+  // till then, runs a loop continuously
+  while(ADCSRA & (1<<ADSC));
+ 
+  return (ADC);
+
+}
+#endif
